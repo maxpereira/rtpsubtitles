@@ -1,9 +1,11 @@
 import re
 import requests
+import sys
 from bs4 import BeautifulSoup
 
-startIndex = 0
-endIndex = 7500
+startIndex = int(sys.argv[1])
+endIndex = int(sys.argv[2])
+
 while startIndex <= endIndex:
 	# Set up BS4
 	req = requests.get('https://www.rtp.pt/play/p'+str(startIndex)+'/')
@@ -17,41 +19,36 @@ while startIndex <= endIndex:
 		vodString = vodString + "Invalid VOD."
 		print(vodString)
 
-		with open("output.txt", "a") as outp:
+		with open("output"+sys.argv[1]+".txt", "a") as outp:
 			outp.write(vodString+'\n')
+
 		startIndex = startIndex+1
 	else:
-		file = open('out','w')
-		file.write(req.text)
-		file.close()
-
-		file2 = open('out','r')
-
-		capUrl = ""
-
-		pat = "vtt: "
-		for line in file2:
-			if re.search(pat,line):
-				capUrl = line
-
 		# Get program title
 		try:
 			try:
+				# Standard title
 				program_title = bs.find(class_='h3').find_all('a')
-				vodString = vodString + program_title[0].contents[0] + " - "
+				vodString = vodString + program_title[0].contents[0].strip() + " - "
 			except:
+				# Palco title
 				program_title = bs.find(class_='h3')
-				vodString = vodString + program_title.contents[0] + " - "
+				vodString = vodString + program_title.contents[0].strip() + " - "
 		except:
+			# Zigzag title
 			program_title = bs.find('h1')
-			vodString = vodString + program_title.contents[0] + " - "
+			vodString = vodString + program_title.contents[0].strip() + " - "
 
-		if not capUrl == "":
+		# Look for caption link in page source
+		if (req.text.find('vtt: ') != -1):
+			# Has captions
 			vodString = vodString + "CC Available."
 		else:
+			# Does not have captions
 			vodString = vodString + "NO Captions."
+
 		print(vodString)
-		with open("output.txt", "a") as outp:
+		with open("output"+sys.argv[1]+".txt", "a") as outp:
 			outp.write(vodString+'\n')
 
 		startIndex = startIndex+1
