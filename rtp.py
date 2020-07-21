@@ -1,16 +1,15 @@
 import re
 import requests
 import sys
-from bs4 import BeautifulSoup
 
+# Get arguments
 startIndex = int(sys.argv[1])
 endIndex = int(sys.argv[2])
 outFile = sys.argv[3]
 
 while startIndex <= endIndex:
-	# Set up BS4
+	# Request the video page
 	req = requests.get('https://www.rtp.pt/play/p'+str(startIndex)+'/')
-	bs = BeautifulSoup(req.text, 'html.parser')
 
 	# File output for debugging
 	with open("debug", "a") as deb:
@@ -19,9 +18,9 @@ while startIndex <= endIndex:
 	vodString = str(startIndex)+": "
 
 	# Check for invalid
-	invalid_vod = bs.find(class_='vod-no-result')
-	if invalid_vod:
-		vodString = vodString + "Invalid VOD."
+	invalid_vod = req.text.find('vod-no-result')
+	if (invalid_vod != -1):
+		vodString = vodString + "Invalid VOD"
 		print(vodString)
 
 		with open(outFile, "a") as outp:
@@ -37,13 +36,13 @@ while startIndex <= endIndex:
 			vod_title = titleStr[+1:stopIndex-2]
 			vodString = vodString + vod_title + " - "
 		else:
-			try:
-				# It is a Zig Zag video
-				program_title = bs.find('h1')
-				vodString = vodString + program_title.contents[0].strip() + " - Zig Zag - "
-			except:
-				vodString = vodString + "Error Obtaining Title - "
-
+			# It is a Zig Zag video
+			zig_title_check = req.text.find('twitter:title')
+			if (zig_title_check != -1):
+				zigStr = req.text[zig_title_check+23:]
+				zigStopIndex = zigStr.replace('\"', 'XXX', 1).find('\"')
+				zig_title = zigStr[+1:zigStopIndex-2]
+				vodString = vodString + zig_title + " - Zig Zag - "
 
 		# Get content type
 		type_check = req.text.find('content_type : ')
