@@ -44,6 +44,13 @@ while startIndex <= endIndex:
 			program_title = bs.find('h1')
 			vodString = vodString + program_title.contents[0].strip() + " - "
 
+		# Get content type
+		type_check = req.text.find('content_type : ')
+		print(type_check)
+		if (type_check != -1):
+			vod_type = req.text[type_check+16:type_check+21]
+			vodString = vodString + vod_type + " - "
+
 		# Get content air date
 		date_check = req.text.find('content_date: ')
 		if (date_check != -1):
