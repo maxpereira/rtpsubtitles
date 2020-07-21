@@ -29,24 +29,24 @@ while startIndex <= endIndex:
 
 		startIndex = startIndex+1
 	else:
-		# Get program title
-		try:
+		# Get content title
+		title_check = req.text.find('content_title : ')
+		if (title_check != -1):
+			titleStr = req.text[title_check+16:]
+			stopIndex = titleStr.replace('\"', 'XXX', 1).find('\"')
+			vod_title = titleStr[+1:stopIndex-2]
+			vodString = vodString + vod_title + " - "
+		else:
 			try:
-				# Standard title
-				program_title = bs.find(class_='h3').find_all('a')
-				vodString = vodString + program_title[0].contents[0].strip() + " - "
+				# It is a Zig Zag video
+				program_title = bs.find('h1')
+				vodString = vodString + program_title.contents[0].strip() + " - Zig Zag - "
 			except:
-				# Palco title
-				program_title = bs.find(class_='h3')
-				vodString = vodString + program_title.contents[0].strip() + " - "
-		except:
-			# Zigzag title
-			program_title = bs.find('h1')
-			vodString = vodString + program_title.contents[0].strip() + " - "
+				vodString = vodString + "Error Obtaining Title - "
+
 
 		# Get content type
 		type_check = req.text.find('content_type : ')
-		print(type_check)
 		if (type_check != -1):
 			vod_type = req.text[type_check+16:type_check+21]
 			vodString = vodString + vod_type + " - "
