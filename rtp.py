@@ -12,8 +12,8 @@ while startIndex <= endIndex:
 	req = requests.get('https://www.rtp.pt/play/p'+str(startIndex)+'/')
 
 	# File output for debugging
-	with open("debug", "a") as deb:
-		deb.write(req.text)
+	#with open("debug", "a") as deb:
+	#	deb.write(req.text)
 
 	vodString = str(startIndex)+": "
 
@@ -32,8 +32,11 @@ while startIndex <= endIndex:
 		title_check = req.text.find('content_title : ')
 		if (title_check != -1):
 			titleStr = req.text[title_check+16:]
+			titleStr = titleStr.replace('\\\"', 'YY')
 			stopIndex = titleStr.replace('\"', 'XXX', 1).find('\"')
+			titleStr = titleStr.replace('YY', '\\\"')
 			vod_title = titleStr[+1:stopIndex-2]
+			vod_title = vod_title.replace('\\', '')
 			vodString = vodString + vod_title + " - "
 		else:
 			# It is a Zig Zag video
@@ -65,6 +68,7 @@ while startIndex <= endIndex:
 			vodString = vodString + "NO Captions"
 
 		print(vodString)
+
 		with open(outFile, "a") as outp:
 			outp.write(vodString+'\n')
 
