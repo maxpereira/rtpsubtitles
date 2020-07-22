@@ -15,7 +15,8 @@ while startIndex <= endIndex:
 	#with open("debug", "a") as deb:
 	#	deb.write(req.text)
 
-	vodString = "<a href='https://www.rtp.pt/play/p" + str(startIndex) + "/'>" + str(startIndex) + ": "
+	lnkString = "<a href='https://www.rtp.pt/play/p" + str(startIndex) + "/'>"
+	vodString = str(startIndex) + ": "
 
 	# Check for invalid
 	invalid_vod = req.text.find('vod-no-result')
@@ -34,7 +35,7 @@ while startIndex <= endIndex:
 			titleStr = titleStr.replace('YY', '\\\"')
 			vod_title = titleStr[+1:stopIndex-2]
 			vod_title = vod_title.replace('\\', '')
-			vodString = vodString + vod_title + " - "
+			vodString = vodString + vod_title + " , "
 		else:
 			# It is a Zig Zag video
 			zig_title_check = req.text.find('twitter:title')
@@ -42,13 +43,13 @@ while startIndex <= endIndex:
 				zigStr = req.text[zig_title_check+23:]
 				zigStopIndex = zigStr.replace('\"', 'XXX', 1).find('\"')
 				zig_title = zigStr[+1:zigStopIndex-2]
-				vodString = vodString + zig_title + " - Zig Zag - "
+				vodString = vodString + zig_title + " , Zig Zag , "
 
 		# Get content type
 		type_check = req.text.find('content_type : ')
 		if (type_check != -1):
 			vod_type = req.text[type_check+16:type_check+21]
-			vodString = vodString + vod_type + " - "
+			vodString = vodString + vod_type + " , "
 
 		# Get content air date
 		date_check = req.text.find('content_date: ')
@@ -60,11 +61,11 @@ while startIndex <= endIndex:
 		if (req.text.find('vtt: ') != -1):
 			# Has captions
 			with open(outFile+"_CC.html", "a") as outp:
-				outp.write(vodString+"</a><br>"+'\n')
+				outp.write(lnkString+vodString+"</a><br>"+'\n')
 		else:
 			# Does not have captions
 			with open(outFile+"_NoCC.html", "a") as outp:
-				outp.write(vodString+"</a><br>"+'\n')
+				outp.write(lnkString+vodString+"</a><br>"+'\n')
 
 		print(vodString)
 
